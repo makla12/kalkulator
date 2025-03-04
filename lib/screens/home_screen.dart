@@ -123,11 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  late final Map<String, void Function()> _buttonsData = {
-    "AC": _clearAll, "+/-" : _negative, "( )": () {}, "/": () {_enterOperator("/");},
-    "7": (){_enterDigit("7");}, "8": () {_enterDigit("8");}, "9": () {_enterDigit("9");}, "x": () {_enterOperator("x");},
-    "4": () {_enterDigit("4");}, "5": () {_enterDigit("5");}, "6": () {_enterDigit("6");}, "-": () {_enterOperator("-");},
-    "1": () {_enterDigit("1");}, "2": () {_enterDigit("2");}, "3": () {_enterDigit("3");}, "+": () {_enterOperator("+");},
-    "0": () {_enterDigit("0");}, ".": () {_enterDecimalPoint();}, "C" : _clear, "=": (){_operation = _claculate(_operation); _updateDisplayText();},
-  };
+  late final List<Map<String, void Function()>> _buttonsData = [
+    {"AC": _clearAll, "+/-" : _negative, "( )": () {}, "/": () {_enterOperator("/");}},
+    {"7": (){_enterDigit("7");}, "8": () {_enterDigit("8");}, "9": () {_enterDigit("9");}, "x": () {_enterOperator("x");}},
+    {"4": () {_enterDigit("4");}, "5": () {_enterDigit("5");}, "6": () {_enterDigit("6");}, "-": () {_enterOperator("-");}},
+    {"1": () {_enterDigit("1");}, "2": () {_enterDigit("2");}, "3": () {_enterDigit("3");}, "+": () {_enterOperator("+");}},
+    {"0": () {_enterDigit("0");}, ".": () {_enterDecimalPoint();}, "C" : _clear, "=": (){_operation = _claculate(_operation); _updateDisplayText();}},
+  ];
 }
