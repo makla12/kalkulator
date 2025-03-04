@@ -10,6 +10,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final Map<String, double Function(double a, double b)> operators = {
+    "x":(a, b){return a * b;},
+    "/":(a, b){return a / b;},
+    "+":(a, b){return a + b;},
+    "-":(a, b){return a - b;},
+  };
+
+  final List<List<String>> operationOrder = [["x","/"], ["+","-"]];
+
   String _operation = "";
   String _displayText = "";
 
@@ -20,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _clear() {
+    if(_operation.isEmpty) return;
+
     if (_operation[_operation.length - 1] == ";") {
       _operation = _operation.substring(0, _operation.length - 3);
     } else {
@@ -36,8 +47,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterDigit(String digit) {
-    if(digit == "." && _operation[_operation.length - 1] == ".") return;
     _operation += digit;
+
+    updateDisplayText();
+  }
+
+  void _enterDecimalPoint(){
+    if((_operation.isEmpty ? false : _operation[_operation.length - 1] == ".")) return;
+    if(_operation.substring(_operation.contains(";") ? _operation.lastIndexOf(";") : 0).contains(".")) return;
+
+    _operation += ".";
 
     updateDisplayText();
   }
@@ -60,8 +79,28 @@ class _MyHomePageState extends State<MyHomePage> {
     updateDisplayText();
   }
 
-  void _claculate(String operation){
-    print(operation.split(";"));
+  String _claculate(String operation){
+    if(operation.isEmpty || operation[operation.length - 1] == ";") return operation;
+    List<String> operationList = operation.split(";");
+
+    for(List<String> order in operationOrder){
+      for (int i = 0; i < operationList.length;) {
+        if (order.contains(operationList[i])) {
+          String operator = operationList[i];
+          double a = double.parse(operationList[i - 1]);
+          double b = double.parse(operationList[i + 1]);
+          double newNumber = operators[operator]!(a, b);
+          operationList.removeRange(i - 1, i + 2);
+          i--;
+          operationList.insert(i, newNumber.toString());
+        }
+        i++;
+      }
+    }
+    
+    if(double.parse(operationList.first) % 1 == 0) return operationList.first.substring(0, operationList.first.length - 2);
+
+    return operationList.first;
   }
 
   @override
@@ -85,10 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   late final Map<String, void Function()> _buttonsData = {
-    "AC": _clearAll, "C": _clear, "( )": () {}, "/": () {_enterOperator("/");},
+    "AC": _clearAll, "+/-" : _negative, "( )": () {}, "/": () {_enterOperator("/");},
     "7": (){_enterDigit("7");}, "8": () {_enterDigit("8");}, "9": () {_enterDigit("9");}, "x": () {_enterOperator("x");},
     "4": () {_enterDigit("4");}, "5": () {_enterDigit("5");}, "6": () {_enterDigit("6");}, "-": () {_enterOperator("-");},
     "1": () {_enterDigit("1");}, "2": () {_enterDigit("2");}, "3": () {_enterDigit("3");}, "+": () {_enterOperator("+");},
-    "+/-": _negative, "0": () {_enterDigit("0");}, ".": () {_enterDigit(".");}, "=": (){_claculate(_operation);},
+    "0": () {_enterDigit("0");}, ".": () {_enterDecimalPoint();}, "C" : _clear, "=": (){_operation = _claculate(_operation);updateDisplayText();},
   };
 }

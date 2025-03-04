@@ -6,14 +6,15 @@ class Button extends StatelessWidget {
   final void Function() onPressed;
 
   final Map<String, Color> _buttonColors = {
-    "AC": Color(0xFF5c5c5f),
-    "C": Color(0xFF5c5c5f),
-    "( )": Color(0xFF5c5c5f),
+    "AC": Colors.red[900]!,
+    "+/-" : Colors.grey[700]!,
+    "( )": Colors.grey[700]!,
     "/": Colors.orange,
     "x": Colors.orange,
     "-": Colors.orange,
+    "C": Colors.red,
     "+": Colors.orange,
-    "=": Colors.orange,
+    "=": Colors.blue,
   };
   
   @override
