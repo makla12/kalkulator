@@ -22,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _operation = "";
   String _displayText = "";
 
-  void updateDisplayText(){
+  void _updateDisplayText(){
     setState(() {
       _displayText = _operation.replaceAll(";", "");
     });
@@ -37,19 +37,19 @@ class _MyHomePageState extends State<MyHomePage> {
       _operation = _operation = _operation.substring(0, _operation.length - 1);
     }
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   void _clearAll(){
     _operation = "";
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   void _enterDigit(String digit) {
     _operation += digit;
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   void _enterDecimalPoint(){
@@ -58,14 +58,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _operation += ".";
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   void _enterOperator(String operator) {
     if(_operation.isEmpty || _operation[_operation.length - 1] == ";") _clear();
     _operation += ";$operator;";
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   void _negative(){
@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _operation = "-$_operation";
     }
 
-    updateDisplayText();
+    _updateDisplayText();
   }
 
   String _claculate(String operation){
@@ -128,6 +128,6 @@ class _MyHomePageState extends State<MyHomePage> {
     "7": (){_enterDigit("7");}, "8": () {_enterDigit("8");}, "9": () {_enterDigit("9");}, "x": () {_enterOperator("x");},
     "4": () {_enterDigit("4");}, "5": () {_enterDigit("5");}, "6": () {_enterDigit("6");}, "-": () {_enterOperator("-");},
     "1": () {_enterDigit("1");}, "2": () {_enterDigit("2");}, "3": () {_enterDigit("3");}, "+": () {_enterOperator("+");},
-    "0": () {_enterDigit("0");}, ".": () {_enterDecimalPoint();}, "C" : _clear, "=": (){_operation = _claculate(_operation);updateDisplayText();},
+    "0": () {_enterDigit("0");}, ".": () {_enterDecimalPoint();}, "C" : _clear, "=": (){_operation = _claculate(_operation); _updateDisplayText();},
   };
 }
