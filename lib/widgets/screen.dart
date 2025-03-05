@@ -8,8 +8,12 @@ class Screen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.topRight,
-      padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 75),
-      child: Text(text, style: TextStyle(fontSize: 70, color: Colors.white)),
+      padding: EdgeInsets.only(left: 10, right: 10, top: 40, bottom: 45),
+      child:SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        child: Text(text, style: TextStyle(fontSize: 70, color: Colors.white)),
+      ),
     );
   }
 }

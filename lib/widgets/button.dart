@@ -33,7 +33,7 @@ class Button extends StatelessWidget {
             backgroundColor: _buttonColors[text] ?? Colors.grey[900],
             textStyle: TextStyle(fontSize: min(constrain.maxHeight, constrain.maxWidth) / (_buttonTextSize[text] ?? 3)),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(30),
             ),
           ),
           child: Text(text, style: TextStyle(color: Colors.white)),

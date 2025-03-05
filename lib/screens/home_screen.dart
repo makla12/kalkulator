@@ -17,6 +17,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _operation = "";
   String _displayText = "";
+  bool _errored = false;
 
   void _updateDisplayText() {
     setState(() {
@@ -25,6 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _clear() {
+    if(_errored) return;
     if (_operation.isEmpty) return;
 
     if (_operation[_operation.length - 1] == ";") {
@@ -38,17 +40,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _clearAll() {
     _operation = "";
+    _errored = false;
 
     _updateDisplayText();
   }
 
   void _enterDigit(String digit) {
+    if(_errored) return;
+    if(_operation.isNotEmpty && _operation[_operation.length - 1] == ")") _operation += ";x;";
     _operation += digit;
 
     _updateDisplayText();
   }
 
   void _enterDecimalPoint() {
+    if(_errored) return;
     if ((_operation.isEmpty ? false : _operation[_operation.length - 1] == ".")) return;
 
     if (_operation.substring(_operation.contains(";") ? _operation.lastIndexOf(";") : 0).contains(".")) return;
@@ -59,13 +65,59 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterOperator(String operator) {
-    if (_operation.isEmpty || _operation[_operation.length - 1] == ";") _clear();
+    if(_errored) return;
+    if(_operation.isEmpty){
+      if(operator == "-"){
+        _operation += operator;
+        _updateDisplayText();
+      }
+      return;
+    }
+    String lastInOperation = _operation[_operation.length - 1];
+    if(lastInOperation == "("){
+      if(operator == "-"){
+        _operation += operator;
+        _updateDisplayText();
+        return;
+      }
+      _clear();
+      return;
+    }
+    if(lastInOperation == "-"){
+      if(operator != "-") _clear();
+      return;
+    }
+    if (lastInOperation == ";"){
+      if(operator == "-" && (_operation[_operation.length - 2] == "x" || _operation[_operation.length - 2] == "/")){
+        _operation += operator;
+        _updateDisplayText();
+        return;
+      }
+      _clear();
+    }
     _operation += ";$operator;";
 
     _updateDisplayText();
   }
 
+  void _enterBracket() {
+    if(_errored) return;
+    String lastInOperation = _operation.isEmpty ? "" : _operation[_operation.length - 1];
+    bool bracketIsUnclosed = _operation.lastIndexOf("(") > _operation.lastIndexOf(")") || "(".allMatches(_operation).length > ")".allMatches(_operation).length;
+    if (lastInOperation == ";" || lastInOperation == "-" || lastInOperation == "" || lastInOperation == "(") {
+      _operation += "(";
+    } else {
+      if(bracketIsUnclosed){
+        _operation += ")";
+      } else {
+        _operation += ";x;(";
+      }
+    }
+    _updateDisplayText();
+  }
+
   void _negative() {
+    if(_errored) return;
     if (_operation.contains(";") || _operation.isEmpty) return;
     if (_operation[0] == "-") {
       _operation = _operation.substring(1);
@@ -76,17 +128,40 @@ class _MyHomePageState extends State<MyHomePage> {
     _updateDisplayText();
   }
 
-  String _claculate(String operation) {
-    if (operation.isEmpty || operation[operation.length - 1] == ";") return operation;
-    List<String> operationList = operation.split(";");
+  String _reduceBrackets(String operation) {
+    if(!operation.contains("(")) return operation;
+    List<int> openingBackets = [];
+    for(int i = 0; i < operation.length; i++){
+      if(operation[i] == "(") openingBackets.add(i);
+      if(operation[i] != ")") continue;
 
-    for (Map<String, double Function(double a, double b)> order
-        in _operations) {
+      int reduceSize = i - openingBackets.last;
+      String reduceResult = _claculate(operation.substring(openingBackets.last + 1, i));
+      i -= reduceSize - reduceResult.length + 1;
+      operation = operation.replaceRange(openingBackets.last, openingBackets.last + reduceSize + 1, reduceResult);
+      openingBackets.removeLast();
+    }
+    return operation;
+  }
+
+  String _claculate(String operation) {
+    if (operation.isEmpty || operation.endsWith(";") || operation.endsWith("-") || operation.endsWith("(")) return operation;
+
+    List<String> operationList = operation.split(";");
+    for (Map<String, double Function(double a, double b)> order in _operations) {
       for (int i = 0; i < operationList.length; i++) {
         if (order.keys.contains(operationList[i])) {
           String operator = operationList[i];
-          double a = double.parse(operationList[i - 1]);
-          double b = double.parse(operationList[i + 1]);
+          double a;
+          double b;
+          try{
+            a = double.parse(operationList[i - 1]);
+            b = double.parse(operationList[i + 1]);
+          }
+          catch (error){
+            _errored = true;
+            return "Error";
+          }
           double newNumber = order[operator]!(a, b);
           operationList.removeRange(i - 1, i + 2);
           i--;
@@ -99,10 +174,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (double.parse(result) % 1 == 0) return double.parse(result).toStringAsFixed(0);
 
-    return result;
+    return double.parse(double.parse(result).toStringAsFixed(14)).toString();
   }
 
   void _evaluate() {
+    if(_errored) return;
+    int numOfUncosedBrackets = "(".allMatches(_operation).length - ")".allMatches(_operation).length;
+    _operation += ")" * numOfUncosedBrackets;
+    _operation = _reduceBrackets(_operation);
+
     _operation = _claculate(_operation);
 
     _updateDisplayText();
@@ -112,18 +192,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        titleTextStyle: TextStyle(color: Colors.white),
-        title: Text("Calculator"),
-      ),
-
-      body: Column(
-        children: <Widget>[
-          Screen(text: _displayText),
-
-          CalculatorGrid(buttonsData: _buttonsData),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Screen(text: _displayText),
+        
+            CalculatorGrid(buttonsData: _buttonsData),
+          ],
+        ),
       ),
     );
   }
@@ -131,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final List<Map<String, void Function()>> _buttonsData = [
     {
       "AC": _clearAll,
-      "( )": () {},
+      "( )": _enterBracket,
       "+/-": _negative,
       "/": () => _enterOperator("/"),
     },
