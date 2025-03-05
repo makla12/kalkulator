@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class Button extends StatelessWidget {
   Button({super.key, required this.text, required this.onPressed});
@@ -16,20 +17,28 @@ class Button extends StatelessWidget {
     "+": Colors.orange,
     "=": Colors.blue,
   };
+
+  final Map<String, num> _buttonTextSize = {
+    "AC": 4.5,
+    "+/-": 4,
+  };
   
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _buttonColors[text] ?? Colors.grey[900],
-        alignment: Alignment.center,
-        textStyle: TextStyle(fontSize: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      child: Text(text, style: TextStyle(color: Colors.white)),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constrain) {
+        return ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _buttonColors[text] ?? Colors.grey[900],
+            textStyle: TextStyle(fontSize: min(constrain.maxHeight, constrain.maxWidth) / (_buttonTextSize[text] ?? 3)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Text(text, style: TextStyle(color: Colors.white)),
+        );
+      },
     );
   }
 }
