@@ -137,9 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
     },
     {
       "7": () => _enterDigit("7"),
-      "8": () {
-        _enterDigit("8");
-      },
+      "8": () => _enterDigit("8"),
       "9": () => _enterDigit("9"),
       "x": () => _enterOperator("x"),
     },
