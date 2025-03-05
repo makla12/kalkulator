@@ -26,7 +26,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _clear() {
-    if(_errored) return;
+    if(_errored){
+      _clearAll();
+      return;
+    } 
     if (_operation.isEmpty) return;
 
     if (_operation[_operation.length - 1] == ";") {
