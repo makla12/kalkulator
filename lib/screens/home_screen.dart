@@ -49,12 +49,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterDecimalPoint() {
-    if ((_operation.isEmpty ? false : _operation[_operation.length - 1] == "."))
-      return;
-    if (_operation
-        .substring(_operation.contains(";") ? _operation.lastIndexOf(";") : 0)
-        .contains("."))
-      return;
+    if ((_operation.isEmpty ? false : _operation[_operation.length - 1] == ".")) return;
+
+    if (_operation.substring(_operation.contains(";") ? _operation.lastIndexOf(";") : 0).contains(".")) return;
 
     _operation += ".";
 
@@ -62,8 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterOperator(String operator) {
-    if (_operation.isEmpty || _operation[_operation.length - 1] == ";")
-      _clear();
+    if (_operation.isEmpty || _operation[_operation.length - 1] == ";") _clear();
     _operation += ";$operator;";
 
     _updateDisplayText();
@@ -84,7 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (operation.isEmpty || operation[operation.length - 1] == ";") return operation;
     List<String> operationList = operation.split(";");
 
-    for (Map<String, double Function(double a, double b)> order in _operations) {
+    for (Map<String, double Function(double a, double b)> order
+        in _operations) {
       for (int i = 0; i < operationList.length; i++) {
         if (order.keys.contains(operationList[i])) {
           String operator = operationList[i];
@@ -99,10 +96,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     String result = operationList.single;
-    
+
     if (double.parse(result) % 1 == 0) return double.parse(result).toStringAsFixed(0);
 
     return result;
+  }
+
+  void _evaluate() {
+    _operation = _claculate(_operation);
+
+    _updateDisplayText();
   }
 
   @override
@@ -128,66 +131,35 @@ class _MyHomePageState extends State<MyHomePage> {
   late final List<Map<String, void Function()>> _buttonsData = [
     {
       "AC": _clearAll,
-      "+/-": _negative,
       "( )": () {},
-      "/": () {
-        _enterOperator("/");
-      },
+      "+/-": _negative,
+      "/": () => _enterOperator("/"),
     },
     {
-      "7": () {
-        _enterDigit("7");
-      },
+      "7": () => _enterDigit("7"),
       "8": () {
         _enterDigit("8");
       },
-      "9": () {
-        _enterDigit("9");
-      },
-      "x": () {
-        _enterOperator("x");
-      },
+      "9": () => _enterDigit("9"),
+      "x": () => _enterOperator("x"),
     },
     {
-      "4": () {
-        _enterDigit("4");
-      },
-      "5": () {
-        _enterDigit("5");
-      },
-      "6": () {
-        _enterDigit("6");
-      },
-      "-": () {
-        _enterOperator("-");
-      },
+      "4": () => _enterDigit("4"),
+      "5": () => _enterDigit("5"),
+      "6": () => _enterDigit("6"),
+      "-": () => _enterOperator("-"),
     },
     {
-      "1": () {
-        _enterDigit("1");
-      },
-      "2": () {
-        _enterDigit("2");
-      },
-      "3": () {
-        _enterDigit("3");
-      },
-      "+": () {
-        _enterOperator("+");
-      },
+      "1": () => _enterDigit("1"),
+      "2": () => _enterDigit("2"),
+      "3": () => _enterDigit("3"),
+      "+": () => _enterOperator("+"),
     },
     {
-      "0": () {
-        _enterDigit("0");
-      },
-      ".": () {
-        _enterDecimalPoint();
-      },
+      "0": () => _enterDigit("0"),
+      ".": () => _enterDecimalPoint(),
       "C": _clear,
-      "=": () {
-        _operation = _claculate(_operation);
-        _updateDisplayText();
-      },
+      "=": _evaluate,
     },
   ];
 }
