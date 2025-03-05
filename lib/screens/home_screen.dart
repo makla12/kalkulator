@@ -182,6 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _evaluate() {
     if(_errored) return;
+    _operation = _operation.replaceAll(RegExp("-\\("), "-1;x;(");
     int numOfUncosedBrackets = "(".allMatches(_operation).length - ")".allMatches(_operation).length;
     _operation += ")" * numOfUncosedBrackets;
     _operation = _reduceBrackets(_operation);
