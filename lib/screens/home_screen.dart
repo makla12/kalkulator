@@ -17,7 +17,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _operation = "";
   String _displayText = "";
-  bool _errored = false;
+  bool _error = false;
+  bool _isResult = false;
 
   void _updateDisplayText() {
     setState(() {
@@ -26,13 +27,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _clear() {
-    if(_errored){
-      _clearAll();
-      return;
-    } 
+    if(_isResult || _error) _clearAll();
+
     if (_operation.isEmpty) return;
 
-    if (_operation[_operation.length - 1] == ";") {
+    if (_operation.endsWith(";")) {
       _operation = _operation.substring(0, _operation.length - 3);
     } else {
       _operation = _operation = _operation.substring(0, _operation.length - 1);
@@ -43,22 +42,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _clearAll() {
     _operation = "";
-    _errored = false;
+    _isResult = false;
+    _error = false;
 
     _updateDisplayText();
   }
 
   void _enterDigit(String digit) {
-    if(_errored) return;
-    if(_operation.isNotEmpty && _operation[_operation.length - 1] == ")") _operation += ";x;";
+    if(_isResult || _error) _clearAll();
+    if(_operation.endsWith(")")) _operation += ";x;";
     _operation += digit;
 
     _updateDisplayText();
   }
 
   void _enterDecimalPoint() {
-    if(_errored) return;
-    if ((_operation.isEmpty ? false : _operation[_operation.length - 1] == ".")) return;
+    if(_isResult || _error) _clearAll();
+    if (_operation.endsWith(".")) return;
 
     if (_operation.substring(_operation.contains(";") ? _operation.lastIndexOf(";") : 0).contains(".")) return;
 
@@ -68,7 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterOperator(String operator) {
-    if(_errored) return;
+    if(_error) _clearAll();
+    _isResult = false;
     if(_operation.isEmpty){
       if(operator == "-"){
         _operation += operator;
@@ -104,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _enterBracket() {
-    if(_errored) return;
+    if(_isResult || _error) _clearAll();
     String lastInOperation = _operation.isEmpty ? "" : _operation[_operation.length - 1];
     bool bracketIsUnclosed = _operation.lastIndexOf("(") > _operation.lastIndexOf(")") || "(".allMatches(_operation).length > ")".allMatches(_operation).length;
     if (lastInOperation == ";" || lastInOperation == "-" || lastInOperation == "" || lastInOperation == "(") {
@@ -120,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _negative() {
-    if(_errored) return;
+    if(_isResult || _error) return;
     if (_operation.contains(";") || _operation.isEmpty) return;
     if (_operation[0] == "-") {
       _operation = _operation.substring(1);
@@ -162,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
             b = double.parse(operationList[i + 1]);
           }
           catch (error){
-            _errored = true;
+            _error = true;
             return "Error";
           }
           double newNumber = order[operator]!(a, b);
@@ -181,13 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _evaluate() {
-    if(_errored) return;
+    if(_isResult || _error) return;
     _operation = _operation.replaceAll(RegExp("-\\("), "-1;x;(");
     int numOfUncosedBrackets = "(".allMatches(_operation).length - ")".allMatches(_operation).length;
     _operation += ")" * numOfUncosedBrackets;
     _operation = _reduceBrackets(_operation);
 
     _operation = _claculate(_operation);
+    _isResult = true;
 
     _updateDisplayText();
   }
