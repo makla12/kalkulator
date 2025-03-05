@@ -121,7 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _negative() {
-    if(_isResult || _error) return;
+    if(_error) return;
+    _isResult = false;
     if (_operation.contains(";") || _operation.isEmpty) return;
     if (_operation[0] == "-") {
       _operation = _operation.substring(1);
